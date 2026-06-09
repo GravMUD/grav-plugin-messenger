@@ -69,7 +69,13 @@ class MessengerPlugin extends Plugin
             }
 
             require_once __DIR__ . '/classes/MudMessenger.php';
-            (new \Grav\Plugin\Messenger\MudMessenger($this->grav))->handle($action);
+            require_once __DIR__ . '/classes/MudMessengerMambersBridge.php';
+            $messenger = new \Grav\Plugin\Messenger\MudMessenger($this->grav);
+            $siteUser = \Grav\Plugin\Messenger\MudMessengerMambersBridge::siteUser($this->grav);
+            if ($siteUser !== null) {
+                $messenger->setApiUser($siteUser);
+            }
+            $messenger->handle($action);
             exit;
         }
 
@@ -154,8 +160,24 @@ class MessengerPlugin extends Plugin
         $base = rtrim((string) $this->grav['base_url'], '/');
 
         require_once __DIR__ . '/classes/MudMessengerTheme.php';
+        require_once __DIR__ . '/classes/MudMessengerMambersBridge.php';
+        require_once __DIR__ . '/classes/MudMessengerIdentity.php';
         $themeVars = MudMessengerTheme::resolveFromConfig($cfg);
         $themeStyle = MudMessengerTheme::toInlineStyle($themeVars);
+
+        $siteSession = null;
+        $siteSessionJson = '';
+        $siteUser = MudMessengerMambersBridge::siteUser($this->grav);
+        if ($siteUser !== null) {
+            $siteSession = (new MudMessengerIdentity($this->grav))->sessionForUser($siteUser);
+            if ($siteSession !== null) {
+                $siteSessionJson = htmlspecialchars(
+                    (string) json_encode($siteSession, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
+            }
+        }
 
         $this->grav['twig']->twig_vars['grav_mud_messenger'] = [
             'enabled' => true,
@@ -163,7 +185,7 @@ class MessengerPlugin extends Plugin
             'is_pro' => $isPro,
             'name' => $brandTitle,
             'product' => $isPro ? 'GravFans Messenger Pro' : 'GravFans Messenger',
-            'version' => '0.3.0',
+            'version' => '0.3.1',
             'api_route' => $route,
             'api' => $base . '/' . $route,
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),
@@ -181,6 +203,9 @@ class MessengerPlugin extends Plugin
             'theme_custom_css' => (string) ($cfg['theme_custom_css'] ?? ''),
             'thread_background' => MudMessengerTheme::threadBackgroundImage($cfg),
             'moderation_enabled' => $isPro && !empty($cfg['moderation_enabled']),
+            'mambers_bridge' => MudMessengerMambersBridge::identityBridgeEnabled($this->grav),
+            'site_session' => $siteSession,
+            'site_session_json' => $siteSessionJson,
         ];
     }
 

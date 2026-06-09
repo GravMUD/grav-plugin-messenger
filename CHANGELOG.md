@@ -1,3 +1,12 @@
+# v0.3.1
+## 06/05/2026
+
+1. [](#new)
+    * **Mambers Lite identity bridge** — when Mambers is installed, logged-in members get locked chat nicks via Grav Login (fullname or username)
+    * `GET /api/v1/mud-messenger/identity/session` for session refresh after login
+2. [](#improved)
+    * Mambers Pro maps `site.member.moderator` → Messenger mod permissions when both plugins are present
+
 # v0.3.0
 ## 06/09/2026
 

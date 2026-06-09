@@ -72,6 +72,18 @@ class MudMessenger
                 return;
             }
 
+            if ($action === 'identity/session') {
+                $this->requireMethod($method, 'GET');
+                require_once __DIR__ . '/MudMessengerIdentity.php';
+                require_once __DIR__ . '/MudMessengerMambersBridge.php';
+                $user = $this->resolveAuthedUser();
+                $session = $user !== null
+                    ? (new MudMessengerIdentity($this->grav))->sessionForUser($user)
+                    : null;
+                $this->respondJson(['ok' => true, 'session' => $session]);
+                return;
+            }
+
             if ($action === 'messages') {
                 if ($method === 'GET') {
                     $group = (string) ($_GET['group'] ?? $_GET['groupId'] ?? 'general');
@@ -83,8 +95,9 @@ class MudMessenger
                 if ($method === 'POST') {
                     require_once __DIR__ . '/MudMessengerModeration.php';
                     $body = $this->readJsonBody();
-                    if ($this->apiUser !== null) {
-                        $body['_api_user'] = $this->apiUser;
+                    $apiUser = $this->resolveAuthedUser();
+                    if ($apiUser !== null) {
+                        $body['_api_user'] = $apiUser;
                     }
                     $this->respondJson($this->storage->postMessage($body, new MudMessengerModeration($this->grav)));
                     return;
@@ -315,14 +328,15 @@ class MudMessenger
 
         if ($action === 'mod/session') {
             $this->requireMethod($method, 'GET');
-            if ($this->apiUser !== null) {
+            $authedUser = $this->resolveAuthedUser();
+            if ($authedUser !== null) {
                 require_once __DIR__ . '/MudMessengerIdentity.php';
                 $identity = new MudMessengerIdentity($this->grav);
-                $perms = $identity->moderatorPermissionsForUser($this->apiUser);
+                $perms = $identity->moderatorPermissionsForUser($authedUser);
                 if ($perms !== null) {
                     $this->respondJson([
                         'ok' => true,
-                        'username' => $identity->displayNameForUser($this->apiUser),
+                        'username' => $identity->displayNameForUser($authedUser),
                         'isModerator' => true,
                         'permissions' => $perms,
                         'banned' => false,
@@ -500,6 +514,32 @@ class MudMessenger
         }
     }
 
+    /** @return array<string, mixed> */
+    private function readJsonBody(): array
+    {
+        if ($this->jsonBodyOverride !== null) {
+            return $this->jsonBodyOverride;
+        }
+        $raw = (string) file_get_contents('php://input');
+        if ($raw === '') {
+            return [];
+        }
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function resolveAuthedUser()
+    {
+        if ($this->apiUser !== null) {
+            return $this->apiUser;
+        }
+
+        require_once __DIR__ . '/MudMessengerMambersBridge.php';
+
+        return MudMessengerMambersBridge::siteUser($this->grav);
+    }
+
     /** @param array<string, mixed> $payload */
     private function respondJson(array $payload): void
     {
@@ -518,20 +558,5 @@ class MudMessenger
     {
         $this->bridgeHttpCode = $code;
         $this->respondJson(['ok' => false, 'error' => $message]);
-    }
-
-    /** @return array<string, mixed> */
-    private function readJsonBody(): array
-    {
-        if ($this->jsonBodyOverride !== null) {
-            return $this->jsonBodyOverride;
-        }
-        $raw = (string) file_get_contents('php://input');
-        if ($raw === '') {
-            return [];
-        }
-        $decoded = json_decode($raw, true);
-
-        return is_array($decoded) ? $decoded : [];
     }
 }

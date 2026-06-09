@@ -75,6 +75,11 @@ class MudMessengerIdentity
             return $this->fullModeratorPermissions();
         }
 
+        $mambersMod = $this->mambersModeratorPermissions($user);
+        if ($mambersMod !== null) {
+            return $mambersMod;
+        }
+
         $username = strtolower((string) $user->username());
         foreach ($this->moderatorRows() as $row) {
             if (!is_array($row)) {
@@ -177,6 +182,30 @@ class MudMessengerIdentity
         }
 
         return array_values($unique);
+    }
+
+    /** @return array<string, mixed>|null */
+    private function mambersModeratorPermissions(UserInterface $user): ?array
+    {
+        require_once __DIR__ . '/MudMessengerMambersBridge.php';
+        if (!MudMessengerMambersBridge::identityBridgeEnabled($this->grav)
+            || !MudMessengerMambersBridge::isPro($this->grav)) {
+            return null;
+        }
+
+        if (!method_exists($user, 'authorize') || !$user->authorize('site.member.moderator')) {
+            return null;
+        }
+
+        return [
+            'username' => $this->displayNameForUser($user),
+            'can_edit' => true,
+            'can_delete' => true,
+            'can_warn' => true,
+            'can_boot' => true,
+            'can_ban' => true,
+            'can_launch_forms' => true,
+        ];
     }
 
     private function isApiSuper(UserInterface $user): bool

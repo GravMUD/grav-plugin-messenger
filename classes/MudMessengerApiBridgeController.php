@@ -42,7 +42,7 @@ class MudMessengerApiBridgeController
         require_once __DIR__ . '/MudMessenger.php';
         $messenger = new MudMessenger($this->grav);
         $messenger->setBridgeMode(true);
-        $apiUser = $this->optionalApiUser($request);
+        $apiUser = $this->optionalApiUser($request) ?? $this->mambersSiteUser();
         if ($apiUser !== null) {
             $messenger->setApiUser($apiUser);
         }
@@ -109,5 +109,12 @@ class MudMessengerApiBridgeController
         }
 
         return null;
+    }
+
+    private function mambersSiteUser(): ?UserInterface
+    {
+        require_once __DIR__ . '/MudMessengerMambersBridge.php';
+
+        return MudMessengerMambersBridge::siteUser($this->grav);
     }
 }

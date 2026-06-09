@@ -1,6 +1,6 @@
 # GPM submission — Messenger
 
-**Filed:** *(pending)*
+**Filed:** https://github.com/getgrav/grav/issues/4118
 
 See `GPM-ISSUE-BODY.md` for full issue body.
 

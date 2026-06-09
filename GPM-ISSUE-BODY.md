@@ -1,8 +1,8 @@
 I would like to add my new plugin to the Grav Repository.
 
 **Repository:** https://github.com/GravMUD/grav-plugin-messenger
-**Release:** https://github.com/GravMUD/grav-plugin-messenger/releases/tag/0.3.0
-**Direct install:** https://github.com/GravMUD/grav-plugin-messenger/releases/download/0.3.0/grav-plugin-messenger.zip
+**Release:** https://github.com/GravMUD/grav-plugin-messenger/releases/tag/0.3.1
+**Direct install:** https://github.com/GravMUD/grav-plugin-messenger/releases/download/0.3.1/grav-plugin-messenger.zip
 **Plugin name:** GravFans Messenger
 **Plugin slug:** messenger
 **License:** MIT (Lite edition)
@@ -14,10 +14,12 @@ I would like to add my new plugin to the Grav Repository.
 
 ## Summary
 
-**GravFans Messenger** is flat-file community chat for Grav 2.0 — float bubble, groups, Giphy, swag tags, Paint Shop theming, Admin2 cockpit, SSE/poll realtime, optional Eventz wire-ins. **Single plugin** (v0.3.0 merged engine + Admin2 page). Admin2 sidebar via runtime API hooks only — **does not write `admin-next.yaml`**.
+**GravFans Messenger** is flat-file community chat for Grav 2.0 — float bubble, groups, Giphy, swag tags, Paint Shop theming, Admin2 cockpit, SSE/poll realtime, optional Eventz wire-ins. **Single plugin** (v0.3.1 merged engine + Admin2 page). Admin2 sidebar via runtime API hooks only — **does not write `admin-next.yaml`**.
 
 **Lite (MIT):** chat, Giphy, swag tags, unlimited groups, Paint Shop.  
 **Pro (commercial roadmap):** moderation + form builder — config-gated today; license keys with The Mud Bazaar later.
+
+**Mambers integration (v0.3.1):** when [Mambers](https://github.com/GravMUD/grav-plugin-mambers) is installed, logged-in site members get locked chat nicks from Grav Login — no second identity layer. Optional soft dependency; auto-detected at runtime.
 
 Not Discord cosplay. Works on any Grav 2 site — not MUD-specific.
 
@@ -29,14 +31,14 @@ Not Discord cosplay. Works on any Grav 2 site — not MUD-specific.
 - admin2 >= 1.0.0
 - api >= 1.0.0
 
-Optional: swag-store (`:tag:` thumbnails), eventz (auto chat groups on event save).
+Optional: swag-store (`:tag:` thumbnails), eventz (auto chat groups on event save), **mambers** (Lite nick lock when both plugins enabled).
 
 ---
 
 ## Suggested maintainer test plan (~10 min)
 
 ```bash
-bin/gpm direct-install https://github.com/GravMUD/grav-plugin-messenger/releases/download/0.3.0/grav-plugin-messenger.zip
+bin/gpm direct-install https://github.com/GravMUD/grav-plugin-messenger/releases/download/0.3.1/grav-plugin-messenger.zip
 bin/grav cache
 ```
 
@@ -56,7 +58,7 @@ Live reference: https://messenger.gravmud.site · https://gravfans.live
 
 - [x] MIT LICENSE
 - [x] README.md with install + Giphy + Lite/Pro tiers
-- [x] blueprints.yaml (semver **0.3.0**, slug **messenger**)
+- [x] blueprints.yaml (semver **0.3.1**, slug **messenger**)
 - [x] CHANGELOG.md (Grav format)
 - [x] Semver GitHub release with zip asset
 - [x] Docs site + CNAME (messenger.gravmud.site)
@@ -72,7 +74,7 @@ bin/gpm install messenger
 
 Please list **one slug: `messenger`** only (repo `grav-plugin-messenger`, not `grav-plugin-grav-mud-messenger`).
 
-Pairs with [Eventz](https://github.com/getgrav/grav/issues/4116), [Swag Store](https://github.com/getgrav/grav/issues/4117), and [JavaBean for Admin2](https://github.com/getgrav/grav/issues/4100) in the Team DC / Grav Social Stack.
+Pairs with [Mambers](https://github.com/GravMUD/grav-plugin-mambers) (membership Lite), [Eventz](https://github.com/getgrav/grav/issues/4116), [Swag Store](https://github.com/getgrav/grav/issues/4117), and [JavaBean for Admin2](https://github.com/getgrav/grav/issues/4100) in the Team DC / Grav Social Stack.
 
 Happy to adjust anything for the index. Thanks Andy!
 

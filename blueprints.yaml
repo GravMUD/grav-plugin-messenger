@@ -1,7 +1,7 @@
 name: GravFans Messenger
 slug: messenger
 type: plugin
-version: 0.3.0
+version: 0.3.1
 description: GravFans Messenger (Lite) — flat-file community chat. Pro unlocks moderation, form builder, PM & AV (roadmap).
 icon: comment-dots
 author:

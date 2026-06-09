@@ -18,5 +18,6 @@
   {% if grav_mud_messenger.thread_background %}data-thread-bg="{{ grav_mud_messenger.thread_background|e('html_attr') }}"{% endif %}
   data-moderation="{{ grav_mud_messenger.moderation_enabled ? '1' : '0' }}"
   {% if grav_mud_messenger.theme_style %}data-theme-style="{{ grav_mud_messenger.theme_style|e('html_attr') }}"{% endif %}
+  {% if grav_mud_messenger.site_session_json %}data-session="{{ grav_mud_messenger.site_session_json }}"{% endif %}
   hidden
 ></div>
