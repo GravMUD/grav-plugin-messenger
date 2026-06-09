@@ -9,6 +9,8 @@ use Grav\Common\Plugin;
 use Grav\Plugin\Messenger\MudMessengerAdminBridgeController;
 use Grav\Plugin\Messenger\MudMessengerApiBridgeController;
 use Grav\Plugin\Messenger\MudMessengerConfig;
+use Grav\Plugin\Messenger\MudMessengerIdentity;
+use Grav\Plugin\Messenger\MudMessengerMambersBridge;
 use Grav\Plugin\Messenger\MudMessengerTheme;
 use RocketTheme\Toolbox\Event\Event;
 
@@ -175,7 +177,7 @@ class MessengerPlugin extends Plugin
             'is_pro' => $isPro,
             'name' => $brandTitle,
             'product' => $isPro ? 'GravFans Messenger Pro' : 'GravFans Messenger',
-            'version' => '0.3.3',
+            'version' => '0.3.4',
             'api_route' => $route,
             'api' => $base . '/' . $route,
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),

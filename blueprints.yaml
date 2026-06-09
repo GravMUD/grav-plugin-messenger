@@ -1,7 +1,7 @@
 name: GravFans Messenger
 slug: messenger
 type: plugin
-version: 0.3.3
+version: 0.3.4
 description: Flat-file community chat for Grav 2.0 — polling transport, Giphy, Paint Shop. Pro unlocks moderation and forms.
 icon: comment-dots
 author:

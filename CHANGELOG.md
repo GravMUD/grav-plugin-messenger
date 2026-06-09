@@ -1,3 +1,9 @@
+# v0.3.4
+## 06/05/2026
+
+1. [](#bugfix)
+    * **Mambers bridge boot** — `messenger.php` imports `MudMessengerMambersBridge` + `MudMessengerIdentity` in `Grav\Plugin\Messenger` namespace (fixes `Class "Grav\Plugin\MudMessengerMambersBridge" not found` on sites with Mambers identity bridge enabled)
+
 # v0.3.3
 ## 06/05/2026
 
