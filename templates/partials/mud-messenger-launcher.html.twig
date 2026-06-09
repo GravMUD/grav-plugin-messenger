@@ -1,0 +1,22 @@
+<div
+  id="mud-messenger-root"
+  class="mud-messenger-root{% if grav_mud_messenger.is_pro %} mud-messenger-root--pro{% endif %}"
+  data-mud-messenger
+  data-api="{{ grav_mud_messenger.api }}"
+  data-default-group="{{ grav_mud_messenger.default_group }}"
+  data-giphy="{{ grav_mud_messenger.giphy_enabled ? '1' : '0' }}"
+  data-poll="{{ grav_mud_messenger.poll_interval_ms }}"
+  data-realtime="{{ grav_mud_messenger.realtime|default('poll') }}"
+  data-edition="{{ grav_mud_messenger.edition|default('lite') }}"
+  data-brand-title="{{ grav_mud_messenger.name|e('html_attr') }}"
+  data-footer="{{ grav_mud_messenger.show_footer_branding ? '1' : '0' }}"
+  data-footer-text="{{ grav_mud_messenger.footer_text|e('html_attr') }}"
+  data-footer-url="{{ grav_mud_messenger.footer_url|e('html_attr') }}"
+  data-launcher-position="{{ grav_mud_messenger.launcher_position|default('bottom-right')|e('html_attr') }}"
+  data-launcher-icon="{{ grav_mud_messenger.launcher_icon|default('💬')|e('html_attr') }}"
+  data-theme-preset="{{ grav_mud_messenger.theme_preset|default('default')|e('html_attr') }}"
+  {% if grav_mud_messenger.thread_background %}data-thread-bg="{{ grav_mud_messenger.thread_background|e('html_attr') }}"{% endif %}
+  data-moderation="{{ grav_mud_messenger.moderation_enabled ? '1' : '0' }}"
+  {% if grav_mud_messenger.theme_style %}data-theme-style="{{ grav_mud_messenger.theme_style|e('html_attr') }}"{% endif %}
+  hidden
+></div>

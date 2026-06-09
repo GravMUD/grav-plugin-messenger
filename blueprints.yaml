@@ -1,0 +1,369 @@
+name: GravFans Messenger
+slug: messenger
+type: plugin
+version: 0.3.0
+description: GravFans Messenger (Lite) — flat-file community chat. Pro unlocks moderation, form builder, PM & AV (roadmap).
+icon: comment-dots
+author:
+  name: FutureVision Labs · Team DC
+  email: chief@gravmud.site
+  url: https://gravfans.live
+homepage: https://messenger.gravmud.site
+bugs: https://github.com/GravMUD/grav-plugin-messenger/discussions
+docs: https://messenger.gravmud.site
+keywords: grav, gravfans, messenger, chat, community, giphy, realtime, pro
+license: MIT
+compatibility:
+  grav: ['1.7', '2.0']
+dependencies:
+  - { name: grav, version: '>=2.0.0' }
+  - { name: admin2, version: '>=1.0.0' }
+  - { name: api, version: '>=1.0.0' }
+form:
+  validation: loose
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        general:
+          type: tab
+          title: General
+          fields:
+            enabled:
+              type: toggle
+              label: Plugin Status
+              highlight: 1
+              default: 1
+              validate:
+                type: bool
+            edition:
+              type: select
+              label: Edition
+              default: lite
+              help: Lite = chat, Giphy, swag tags, Paint Shop. Pro unlocks mod tools, form builder, PM & AV (when shipped).
+              options:
+                lite: GravFans Messenger (Lite)
+                pro: GravFans Messenger Pro
+            api_route:
+              type: text
+              label: API route prefix
+              default: api/mud-messenger
+            float_bubble:
+              type: toggle
+              label: Floating Messenger bubble
+              highlight: 1
+              default: 1
+              help: Bottom-right chat launcher on every page (disable on embed-only sites).
+              validate:
+                type: bool
+            admin_cockpit_bubble:
+              type: toggle
+              label: Admin2 cockpit chat bubble
+              highlight: 1
+              default: 1
+              help: Same floating messenger on all Admin2 pages so operators can monitor chat while working.
+              validate:
+                type: bool
+            default_group:
+              type: text
+              label: Default group id
+              default: general
+            poll_interval_ms:
+              type: number
+              label: Poll interval (ms)
+              default: 2500
+              help: Fallback when SSE is unavailable.
+            message_limit:
+              type: number
+              label: Max messages per group
+              default: 500
+            groups:
+              type: array
+              label: Chat groups
+              help: Group id => title, emoji, description.
+        branding:
+          type: tab
+          title: Branding
+          fields:
+            brand_title:
+              type: text
+              label: Panel title
+              placeholder: GravFans Messenger
+              help: Leave blank for edition default (Lite or Pro).
+            show_footer_branding:
+              type: toggle
+              label: Show footer branding
+              highlight: 1
+              default: 1
+              help: e.g. "Powered by GravFans.Live" under the compose box.
+              validate:
+                type: bool
+            footer_text:
+              type: text
+              label: Footer text
+              default: 'Powered by GravFans.Live'
+            footer_url:
+              type: text
+              label: Footer link URL
+              default: 'https://gravfans.live'
+            launcher_position:
+              type: select
+              label: Chatbox position
+              default: bottom-right
+              options:
+                bottom-right: Bottom right
+                bottom-left: Bottom left
+                top-right: Top right
+                top-left: Top left
+            launcher_icon:
+              type: text
+              label: Launcher bubble emoji
+              default: '💬'
+              help: Single emoji shown on the floating chat button.
+            thread_background_image:
+              type: text
+              label: Thread background image (Pro)
+              placeholder: /user/images/messenger/watermark.png
+              help: Watermark behind the message list. Upload in Admin2 Display tab or set a path. Blank uses preset default (GetGRAV! logo on goggrav).
+        integrations:
+          type: tab
+          title: Integrations
+          fields:
+            integrations_help:
+              type: section
+              title: API keys & bridges
+              text: Giphy is proxied server-side — the key never ships to browsers. Pro integrations (surveys, lead forms, Eventz) ship in Messenger Pro.
+            giphy_enabled:
+              type: toggle
+              label: Giphy picker
+              highlight: 1
+              default: 1
+              validate:
+                type: bool
+            giphy_api_key:
+              type: text
+              label: Giphy API key
+              placeholder: Paste key from developers.giphy.com
+              help: Required for GIF search. Set here in Admin — saved in user/config/plugins/messenger.yaml.
+            swag_tags_enabled:
+              type: toggle
+              label: Swag shortcodes (Lite)
+              highlight: 1
+              default: 1
+              help: 'Enable :swag-item: tags linked to Printify products — pairs with swag-store. First catalog image as thumbnail.'
+              validate:
+                type: bool
+            swag_tags_mod_only:
+              type: toggle
+              label: Swag picker — mods only
+              highlight: 1
+              default: 1
+              help: 'When on, only admins/moderators can insert swag tags (guests still see them in chat).'
+              validate:
+                type: bool
+            swag_tags:
+              type: list
+              label: Swag tags
+              help: 'Shortcode tag (e.g. getgrav-tee) → Printify product id from swag-store catalog.json'
+              fields:
+                .tag:
+                  type: text
+                  label: Tag
+                  placeholder: getgrav-tee
+                  help: 'Used as :getgrav-tee: in chat (letters, numbers, dashes only).'
+                .product_id:
+                  type: text
+                  label: Product ID
+                  placeholder: 6a1a4a905d003e82c2063a5e
+                  help: id field from user/data/swag-store/catalog.json
+        moderation:
+          type: tab
+          title: Moderation (Pro)
+          fields:
+            moderation_help:
+              type: section
+              title: Moderators
+              text: Pro edition only. Match chat nick to username. Mod key unlocks edit/delete/warn/boot/ban in chat. MCP bots use the same keys.
+            moderation_enabled:
+              type: toggle
+              label: Enable moderation
+              highlight: 1
+              default: 0
+              validate:
+                type: bool
+            moderators:
+              type: list
+              label: Moderators
+              fields:
+                .username:
+                  type: text
+                  label: Chat username / nick
+                  placeholder: chief
+                .mod_key:
+                  type: text
+                  label: Mod key
+                  placeholder: secret-key-for-this-mod
+                  help: Mod enters this in chat UI to unlock mod tools.
+                .can_edit:
+                  type: toggle
+                  label: Edit messages
+                  highlight: 1
+                  default: 1
+                  validate:
+                    type: bool
+                .can_delete:
+                  type: toggle
+                  label: Delete messages
+                  highlight: 1
+                  default: 1
+                  validate:
+                    type: bool
+                .can_warn:
+                  type: toggle
+                  label: Warn users
+                  highlight: 1
+                  default: 1
+                  validate:
+                    type: bool
+                .can_boot:
+                  type: toggle
+                  label: Boot from room
+                  highlight: 1
+                  default: 1
+                  validate:
+                    type: bool
+                .can_ban:
+                  type: toggle
+                  label: Ban / unban
+                  highlight: 1
+                  default: 1
+                  validate:
+                    type: bool
+                .can_launch_forms:
+                  type: toggle
+                  label: Launch forms in chat
+                  highlight: 1
+                  default: 1
+                  validate:
+                    type: bool
+        forms:
+          type: tab
+          title: Form builder (Pro)
+          fields:
+            forms_help:
+              type: section
+              title: Templates
+              text: 'Survey · Lead capture · Booking — ops launch forms into chat; responses save to user/data/mud-messenger/forms/'
+            forms_enabled:
+              type: toggle
+              label: Enable form builder
+              highlight: 1
+              default: 0
+              validate:
+                type: bool
+            forms:
+              type: list
+              label: Forms
+              fields:
+                .id:
+                  type: text
+                  label: Form id
+                  placeholder: meetup-survey
+                .title:
+                  type: text
+                  label: Title
+                  placeholder: Meetup feedback
+                .template:
+                  type: select
+                  label: Template
+                  default: survey
+                  options:
+                    survey: Survey
+                    lead_gen: Lead capture
+                    booking: Booking request
+                .intro:
+                  type: textarea
+                  label: Intro text
+                  rows: 2
+                .enabled:
+                  type: toggle
+                  label: Enabled
+                  highlight: 1
+                  default: 1
+                  validate:
+                    type: bool
+        paint_shop:
+          type: tab
+          title: Paint Shop
+          fields:
+            paint_help:
+              type: section
+              title: Messenger theming
+              text: JavaBean-style presets for the chat panel — accent, bubbles, dark/light cockpit. Custom CSS appends after preset vars.
+            theme_preset:
+              type: select
+              label: Theme preset
+              default: default
+              options:
+                default: Grav Blue
+                goggrav: GetGRAV! Space
+                javabean: JavaBean Sunset
+                kersey: Kersey Goth
+                synthwave: Team DC Synthwave
+                cathedral: Grav Cathedral
+                terminal: EvvyTink Terminal
+                mambo: Mambo Desktop
+            theme_use_preset_accent:
+              type: toggle
+              label: Use preset accent colours
+              default: 1
+              validate:
+                type: bool
+            theme_accent_hue:
+              type: number
+              label: Custom accent hue (0–360)
+              help: Paint Shop override when preset accent is off.
+              validate:
+                type: number
+                min: 0
+                max: 360
+            theme_accent_saturation:
+              type: number
+              label: Custom accent saturation (0–100)
+              default: 85
+              validate:
+                type: number
+                min: 0
+                max: 100
+            theme_radius:
+              type: select
+              label: Corner radius
+              default: default
+              options:
+                subtle: Subtle
+                default: Default
+                round: Round
+            theme_density:
+              type: select
+              label: UI density
+              default: comfy
+              options:
+                compact: Compact
+                comfy: Comfy
+                spacious: Spacious
+            theme_font:
+              type: select
+              label: Font
+              default: dm-sans
+              options:
+                dm-sans: DM Sans
+                inter: Inter
+                jost: Jost
+                space-grotesk: Space Grotesk
+                jetbrains-mono: JetBrains Mono
+            theme_custom_css:
+              type: textarea
+              label: Custom CSS
+              rows: 6
+              placeholder: '.mud-messenger-panel { border-radius: 0; }'

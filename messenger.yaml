@@ -1,0 +1,40 @@
+enabled: true
+edition: lite
+api_route: api/mud-messenger
+float_bubble: true
+default_group: general
+show_footer_branding: true
+footer_text: 'Powered by GravFans.Live'
+footer_url: 'https://gravfans.live'
+launcher_position: bottom-right
+launcher_icon: "💬"
+poll_interval_ms: 2500
+realtime: poll
+message_limit: 500
+giphy_enabled: true
+giphy_api_key: ''
+swag_tags_enabled: true
+swag_tags:
+  - tag: getgrav-tee
+    product_id: '6a1a4a905d003e82c2063a5e'
+  - tag: getgrav-case
+    product_id: '6a1a4a8d5d003e82c2063a5d'
+  - tag: getgrav-sleeve
+    product_id: '6a1a4a8a5d003e82c2063a5c'
+groups:
+  general:
+    title: General
+    emoji: "💬"
+    description: Site-wide hangout
+  getgrav:
+    title: GetGRAV! Rally
+    emoji: "📢"
+    description: Groundswell chat — campaign energy only
+  dev:
+    title: Dev Lab
+    emoji: "🧪"
+    description: Builders, presets, and `.mud` compiler talk
+  getgrav-brisbane:
+    title: GetGRAV! Brisbane
+    emoji: "🍕"
+    description: Meetup chat — RSVP on /meetup · Garden City pilot

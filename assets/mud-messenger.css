@@ -1,0 +1,1115 @@
+/* GravMUD Messenger — Messenger-style community chat v0.1 */
+
+.mud-messenger-root {
+  --mm-accent: #0082c0;
+  --mm-accent-dark: #006699;
+  --mm-bg: #ffffff;
+  --mm-bg-alt: #f0f2f5;
+  --mm-border: #e4e6eb;
+  --mm-text: #050505;
+  --mm-muted: #65676b;
+  --mm-bubble-me: #0084ff;
+  --mm-bubble-them: #e4e6eb;
+  --mm-shadow: 0 12px 40px rgb(0 0 0 / 0.18);
+  --mm-radius: 1rem;
+  --mm-input-bg: #ffffff;
+  --mm-input-border: #ccd0d5;
+  --mm-input-text: #050505;
+  --mm-input-placeholder: #65676b;
+  --mm-font-family: "DM Sans", system-ui, sans-serif;
+  --mm-ui-pad: 0.55rem;
+  --mm-ui-gap: 0.5rem;
+  font-family: var(--mm-font-family);
+  position: relative;
+  z-index: 99990;
+}
+
+.mud-messenger-launcher {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 99990;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--mm-accent), var(--mm-accent-dark));
+  color: #fff;
+  font-size: 1.35rem;
+  cursor: pointer;
+  box-shadow: var(--mm-shadow);
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease;
+}
+
+.mud-messenger-launcher:hover {
+  transform: scale(1.05);
+}
+
+.mud-messenger-launcher .mm-badge {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.15rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--mm-accent);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  display: none;
+  place-items: center;
+}
+
+.mud-messenger-launcher .mm-badge.is-visible {
+  display: grid;
+}
+
+.mud-messenger-panel {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 5.25rem;
+  z-index: 99990;
+  width: min(22rem, calc(100vw - 2rem));
+  height: min(32rem, calc(100vh - 7rem));
+  background: var(--mm-bg);
+  border-radius: var(--mm-radius);
+  box-shadow: var(--mm-shadow);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--mm-border);
+}
+
+.mud-messenger-panel.is-open {
+  display: flex;
+}
+
+.mud-messenger-panel--embed {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  max-width: 42rem;
+  height: 28rem;
+  margin: 1.5rem auto;
+  display: flex;
+}
+
+/* Admin2 cockpit — float above Admin2 FAB stack */
+.mud-messenger-root--admin-cockpit {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  pointer-events: none;
+}
+
+.mud-messenger-root--admin-cockpit.mud-messenger-root--pos-bottom-right .mud-messenger-launcher {
+  bottom: 5rem;
+  z-index: 100000;
+}
+
+.mud-messenger-root--admin-cockpit.mud-messenger-root--pos-bottom-right .mud-messenger-panel {
+  bottom: 9rem;
+  z-index: 100000;
+}
+
+.mud-messenger-root--admin-cockpit.mud-messenger-root--pos-bottom-left .mud-messenger-launcher {
+  bottom: 5rem;
+  z-index: 100000;
+}
+
+.mud-messenger-root--admin-cockpit.mud-messenger-root--pos-bottom-left .mud-messenger-panel {
+  bottom: 9rem;
+  z-index: 100000;
+}
+
+.mud-messenger-root--admin-cockpit .mud-messenger-launcher,
+.mud-messenger-root--admin-cockpit .mud-messenger-panel {
+  pointer-events: auto;
+}
+
+/* Admin2 shell — JavaBean globals must not bleach Messenger Paint Shop */
+#mud-messenger-admin-cockpit.mud-messenger-root {
+  color: var(--mm-text);
+  font-family: var(--mm-font-family);
+}
+
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-header h2 {
+  color: var(--mm-text);
+}
+
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-panel,
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-header,
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-groups,
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-thread,
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-compose,
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-nick,
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-editor,
+#mud-messenger-admin-cockpit.mud-messenger-root input,
+#mud-messenger-admin-cockpit.mud-messenger-root button {
+  font-family: var(--mm-font-family);
+}
+
+#mud-messenger-admin-cockpit.mud-messenger-root .mud-messenger-panel {
+  background: var(--mm-bg);
+  border-color: var(--mm-border);
+  color: var(--mm-text);
+}
+
+/* GetGRAV! Space preset */
+.mud-messenger-root--preset-goggrav .mud-messenger-header {
+  background: linear-gradient(180deg, var(--mm-bg-alt), var(--mm-bg));
+}
+
+.mud-messenger-root--preset-goggrav .mud-messenger-launcher {
+  box-shadow: 0 12px 36px rgb(226 17 17 / 0.35);
+}
+
+/* Thread watermark — logo/image from Display tab (Pro) or preset default */
+.mud-messenger-root--has-thread-bg .mud-messenger-thread {
+  position: relative;
+}
+
+.mud-messenger-root--has-thread-bg .mud-messenger-thread::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: center / min(75%, 16rem) no-repeat var(--mm-thread-bg-image);
+  opacity: var(--mm-thread-bg-opacity, 0.08);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Admin2 cockpit — live chat dock (legacy embed; settings page no longer uses iframe) */
+.mm-admin-live-dock {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 20rem;
+}
+
+.mm-admin-live-dock [data-mud-messenger-embed] {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mm-admin-live-dock .mud-messenger-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  inset: auto;
+}
+
+.mm-admin-live-dock .mud-messenger-panel--embed {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  max-height: none;
+}
+
+/* Launcher + panel corner placement */
+.mud-messenger-root--pos-bottom-left .mud-messenger-launcher,
+.mud-messenger-root--pos-bottom-left .mud-messenger-panel {
+  right: auto;
+  left: 1.25rem;
+}
+
+.mud-messenger-root--pos-top-right .mud-messenger-launcher,
+.mud-messenger-root--pos-top-right .mud-messenger-panel {
+  bottom: auto;
+  top: 1.25rem;
+}
+
+.mud-messenger-root--pos-top-right .mud-messenger-panel {
+  top: 5.25rem;
+}
+
+.mud-messenger-root--pos-top-left .mud-messenger-launcher,
+.mud-messenger-root--pos-top-left .mud-messenger-panel {
+  right: auto;
+  left: 1.25rem;
+  bottom: auto;
+  top: 1.25rem;
+}
+
+.mud-messenger-root--pos-top-left .mud-messenger-panel {
+  top: 5.25rem;
+}
+
+.mud-messenger-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--mm-bg);
+  border-bottom: 1px solid var(--mm-border);
+}
+
+.mud-messenger-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.mud-messenger-pro-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  background: linear-gradient(135deg, var(--mm-accent), var(--mm-accent-dark));
+  color: #fff;
+  line-height: 1;
+}
+
+.mud-messenger-footer {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--mm-border);
+  font-size: 0.62rem;
+  text-align: center;
+  color: var(--mm-muted);
+}
+
+.mud-messenger-footer a {
+  color: var(--mm-muted);
+  text-decoration: none;
+}
+
+.mud-messenger-footer a:hover {
+  color: var(--mm-accent);
+  text-decoration: underline;
+}
+
+.mud-messenger-root--pro .mud-messenger-header h2 {
+  font-size: 0.92rem;
+}
+
+.mud-messenger-header button {
+  border: none;
+  background: transparent;
+  color: var(--mm-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.mud-messenger-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.mud-messenger-groups {
+  width: 5.5rem;
+  background: var(--mm-bg-alt);
+  border-right: 1px solid var(--mm-border);
+  overflow-y: auto;
+  padding: 0.35rem 0;
+}
+
+.mud-messenger-group-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.55rem 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.58rem;
+  color: var(--mm-muted);
+}
+
+.mud-messenger-group-btn .mm-emoji {
+  font-size: 1.35rem;
+}
+
+.mud-messenger-group-btn.is-active {
+  background: color-mix(in srgb, var(--mm-accent) 16%, transparent);
+  color: var(--mm-accent);
+  font-weight: 600;
+}
+
+.mud-messenger-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mud-messenger-thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: var(--mm-bg-alt);
+}
+
+.mud-messenger-nick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem 0;
+  font-size: 0.72rem;
+  color: var(--mm-muted);
+}
+
+.mud-messenger-nick label {
+  white-space: nowrap;
+}
+
+.mud-messenger-nick .mm-mod-label {
+  margin-left: 0.25rem;
+}
+
+.mud-messenger-nick input {
+  flex: 1;
+  min-width: 5rem;
+  border: 1px dashed var(--mm-border);
+  border-radius: 0.35rem;
+  padding: 0.2rem 0.45rem;
+  font: inherit;
+  background: var(--mm-input-bg);
+  color: var(--mm-input-text);
+}
+
+.mud-messenger-msg {
+  max-width: 85%;
+  align-self: flex-start;
+  position: relative;
+}
+
+.mud-messenger-msg.is-system {
+  max-width: 100%;
+  align-self: center;
+}
+
+.mud-messenger-msg-meta {
+  font-size: 0.62rem;
+  color: var(--mm-muted);
+  margin-bottom: 0.15rem;
+  padding: 0 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mud-messenger-msg-meta.is-role-admin,
+.mud-messenger-msg.is-role-admin .mud-messenger-msg-meta {
+  color: var(--mm-accent);
+  font-weight: 700;
+}
+
+.mud-messenger-msg-meta.is-role-mod,
+.mud-messenger-msg.is-role-mod .mud-messenger-msg-meta {
+  color: #9b59f5;
+  font-weight: 600;
+}
+
+.mud-messenger-msg-meta.is-role-staff,
+.mud-messenger-msg.is-role-staff .mud-messenger-msg-meta {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.mud-messenger-nick input[readonly] {
+  opacity: 0.85;
+  cursor: default;
+  background: color-mix(in srgb, var(--mm-input-bg) 88%, var(--mm-accent) 12%);
+}
+
+.mm-mod-menu {
+  margin-left: auto;
+  display: none;
+  gap: 0.15rem;
+}
+
+.mud-messenger-msg:hover .mm-mod-menu {
+  display: inline-flex;
+}
+
+.mm-mod-menu button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.25rem;
+  line-height: 1;
+}
+
+.mm-mod-menu button:hover {
+  background: rgb(0 0 0 / 0.06);
+}
+
+.mud-messenger-system {
+  background: rgb(255 193 7 / 0.18) !important;
+  color: var(--mm-text) !important;
+  font-size: 0.78rem;
+  font-style: italic;
+  border: 1px dashed rgb(255 193 7 / 0.45);
+}
+
+.mm-edited-tag {
+  font-size: 0.68rem;
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.mud-messenger-form-wrap {
+  background: var(--mm-bg) !important;
+  color: var(--mm-text) !important;
+  padding: 0 !important;
+  border: 1px solid var(--mm-border);
+  overflow: hidden;
+}
+
+.mm-form-card {
+  min-width: 14rem;
+}
+
+.mm-form-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  background: var(--mm-bg-alt);
+  border-bottom: 1px solid var(--mm-border);
+  font-size: 0.82rem;
+}
+
+.mm-form-template {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mm-muted);
+}
+
+.mm-form-intro {
+  margin: 0;
+  padding: 0.45rem 0.65rem 0;
+  font-size: 0.75rem;
+  color: var(--mm-muted);
+}
+
+.mm-form-body {
+  padding: 0.55rem 0.65rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mm-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+}
+
+.mm-form-field input,
+.mm-form-field textarea,
+.mm-form-field select {
+  border: 1px solid var(--mm-input-border);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.45rem;
+  font: inherit;
+  background: var(--mm-input-bg);
+  color: var(--mm-input-text);
+}
+
+.mm-form-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mm-form-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 400;
+}
+
+.mm-form-submit {
+  align-self: flex-start;
+  border: none;
+  border-radius: 0.45rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--mm-accent);
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mm-form-submit:hover {
+  background: var(--mm-accent-dark);
+}
+
+.mm-form-thanks {
+  margin: 0;
+  padding: 0.65rem;
+  font-size: 0.78rem;
+  color: var(--mm-muted);
+}
+
+.mud-messenger-form-launch-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.mm-form-launch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  border: 1px solid var(--mm-border);
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.55rem;
+  background: var(--mm-bg);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.mm-form-launch strong {
+  font-size: 0.78rem;
+}
+
+.mm-form-launch span {
+  font-size: 0.62rem;
+  color: var(--mm-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mm-form-launch:hover {
+  border-color: var(--mm-accent);
+  background: rgb(0 130 192 / 0.06);
+}
+
+.mud-messenger-msg.is-me {
+  align-self: flex-end;
+}
+
+.mud-messenger-msg.is-me .mud-messenger-msg-meta {
+  flex-direction: row-reverse;
+}
+
+.mud-messenger-bubble {
+  padding: 0.45rem 0.65rem;
+  border-radius: 1.1rem;
+  background: var(--mm-bubble-them);
+  color: var(--mm-text);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.mud-messenger-msg.is-me .mud-messenger-bubble {
+  background: var(--mm-bubble-me);
+  color: #fff;
+}
+
+.mud-messenger-bubble img.mm-giphy {
+  display: block;
+  max-width: 100%;
+  border-radius: 0.65rem;
+}
+
+.mud-messenger-compose {
+  border-top: 1px solid var(--mm-border);
+  background: var(--mm-bg);
+  padding: 0.5rem;
+}
+
+.mud-messenger-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.mud-messenger-format {
+  display: flex;
+  gap: 0.2rem;
+  padding-right: 0.35rem;
+  margin-right: 0.15rem;
+  border-right: 1px solid var(--mm-border);
+}
+
+.mud-messenger-format .mm-fmt-btn {
+  min-width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  border: 1px solid var(--mm-border);
+  border-radius: 0.4rem;
+  background: var(--mm-input-bg);
+  color: var(--mm-text);
+  cursor: pointer;
+  font-size: 0.78rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.mud-messenger-format .mm-fmt-btn:hover,
+.mud-messenger-format .mm-fmt-btn:focus-visible {
+  background: var(--mm-bg-alt);
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(0 130 192 / 0.25);
+}
+
+.mud-messenger-format .mm-fmt-code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.mud-messenger-toolbar button {
+  border: none;
+  background: var(--mm-bg-alt);
+  border-radius: 0.45rem;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.mud-messenger-input-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: flex-end;
+}
+
+.mud-messenger-compose-field {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+}
+
+.mud-messenger-input-row input[type="text"],
+.mud-messenger-input-row textarea,
+.mud-messenger-editor {
+  flex: 1;
+  border: 1px solid var(--mm-input-border);
+  border-radius: 1.25rem;
+  padding: 0.45rem 0.75rem;
+  font: inherit;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  resize: none;
+  min-height: 2.75rem;
+  max-height: 10rem;
+  overflow-y: auto;
+  background: var(--mm-input-bg);
+  color: var(--mm-input-text);
+}
+
+.mud-messenger-editor {
+  width: 100%;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  word-break: break-word;
+  outline: none;
+  cursor: text;
+}
+
+.mud-messenger-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--mm-input-placeholder);
+  pointer-events: none;
+}
+
+.mud-messenger-editor:focus {
+  border-color: var(--mm-accent);
+  box-shadow: 0 0 0 2px rgb(0 130 192 / 0.2);
+}
+
+.mud-messenger-editor strong,
+.mud-messenger-editor b {
+  font-weight: 700;
+}
+
+.mud-messenger-editor em,
+.mud-messenger-editor i {
+  font-style: italic;
+}
+
+.mud-messenger-editor code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.9em;
+  padding: 0.06rem 0.3rem;
+  border-radius: 0.3rem;
+  background: rgb(0 0 0 / 0.08);
+}
+
+.mud-messenger-editor a {
+  color: var(--mm-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.mud-messenger-compose-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mud-messenger-compose-field textarea::placeholder {
+  color: var(--mm-input-placeholder);
+  opacity: 1;
+}
+
+.mud-messenger-compose-field textarea:focus {
+  outline: none;
+  border-color: var(--mm-accent);
+  box-shadow: 0 0 0 2px rgb(0 130 192 / 0.2);
+}
+
+.mud-messenger-md strong {
+  font-weight: 700;
+}
+
+.mud-messenger-md em {
+  font-style: italic;
+}
+
+.mud-messenger-md .mm-md-code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.82em;
+  padding: 0.08rem 0.35rem;
+  border-radius: 0.35rem;
+  background: rgb(0 0 0 / 0.08);
+}
+
+.mud-messenger-msg.is-me .mud-messenger-md .mm-md-code {
+  background: rgb(255 255 255 / 0.22);
+}
+
+.mud-messenger-md .mm-md-pre {
+  margin: 0.35rem 0 0;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  background: rgb(0 0 0 / 0.08);
+  overflow-x: auto;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.mud-messenger-msg.is-me .mud-messenger-md .mm-md-pre {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.mud-messenger-md .mm-md-pre code {
+  font-family: inherit;
+}
+
+.mud-messenger-md .mm-md-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.mud-messenger-msg.is-me .mud-messenger-md .mm-md-link {
+  color: #fff;
+}
+
+.mud-messenger-send {
+  border: none;
+  border-radius: 999px;
+  background: var(--mm-accent);
+  color: #fff;
+  width: 2.25rem;
+  height: 2.25rem;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.mud-messenger-picker {
+  display: none;
+  max-height: 7rem;
+  overflow-y: auto;
+  padding: 0.35rem;
+  background: var(--mm-bg-alt);
+  border-radius: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.mud-messenger-picker.is-open {
+  display: block;
+}
+
+.mud-messenger-picker.mud-messenger-giphy-panel.is-open {
+  display: flex;
+}
+
+.mud-messenger-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.15rem;
+}
+
+.mud-messenger-emoji-grid button {
+  border: none;
+  background: transparent;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 0.35rem;
+}
+
+.mud-messenger-emoji-grid button:hover {
+  background: rgb(0 0 0 / 0.06);
+}
+
+.mud-messenger-swag-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+}
+
+.mud-messenger-swag-grid .mm-swag-pick {
+  border: 1px solid var(--mm-border);
+  border-radius: 0.45rem;
+  padding: 0.25rem;
+  background: var(--mm-input-bg);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.58rem;
+  color: var(--mm-muted);
+  line-height: 1.2;
+}
+
+.mud-messenger-swag-grid .mm-swag-pick:hover {
+  border-color: var(--mm-accent);
+  box-shadow: 0 0 0 1px rgb(0 130 192 / 0.2);
+}
+
+.mud-messenger-swag-grid .mm-swag-pick img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 0.35rem;
+}
+
+.mm-swag-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  margin: 0.15rem 0;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.65rem;
+  background: rgb(0 0 0 / 0.06);
+  text-decoration: none;
+  color: inherit;
+  vertical-align: middle;
+}
+
+.mud-messenger-msg.is-me .mm-swag-tag {
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
+}
+
+.mm-swag-tag-img {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 0.45rem;
+  flex-shrink: 0;
+}
+
+.mm-swag-tag-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.mm-swag-tag-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.mm-swag-tag-price {
+  font-size: 0.68rem;
+  opacity: 0.85;
+}
+
+.mm-swag-tag-shop {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.mud-messenger-panel.is-fullscreen {
+  position: fixed;
+  inset: 0.65rem;
+  right: 0.65rem;
+  left: 0.65rem;
+  bottom: 0.65rem;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  z-index: 999999;
+}
+
+.mud-messenger-panel--embed.is-fullscreen {
+  position: fixed;
+  inset: 0.65rem;
+  width: auto;
+  height: auto;
+  max-width: none;
+  margin: 0;
+  z-index: 999999;
+}
+
+.mud-messenger-header button[data-mm-fullscreen] {
+  margin-left: auto;
+  font-size: 0.95rem;
+}
+
+.mud-messenger-giphy-panel {
+  display: none;
+  order: -1;
+  flex-direction: column;
+  max-height: min(16rem, 45vh);
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--mm-border);
+  border-radius: 0.65rem;
+  background: var(--mm-bg-alt);
+  padding: 0.45rem;
+}
+
+.mud-messenger-giphy-panel.is-open {
+  display: flex;
+}
+
+.mud-messenger-compose {
+  display: flex;
+  flex-direction: column;
+}
+
+.mud-messenger-giphy-search input {
+  width: 100%;
+  border: 1px solid var(--mm-input-border);
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  font: inherit;
+  font-size: 0.82rem;
+  background: var(--mm-input-bg);
+  color: var(--mm-input-text);
+}
+
+.mud-messenger-giphy-cats {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding: 0.35rem 0;
+  margin: 0;
+  scrollbar-width: thin;
+}
+
+.mm-giphy-cat {
+  flex: 0 0 auto;
+  border: 1px solid var(--mm-border);
+  border-radius: 999px;
+  background: var(--mm-input-bg);
+  color: var(--mm-text);
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mm-giphy-cat.is-active,
+.mm-giphy-cat:hover {
+  background: var(--mm-accent);
+  border-color: var(--mm-accent);
+  color: #fff;
+}
+
+.mud-messenger-giphy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  align-content: start;
+}
+
+.mud-messenger-giphy-grid button {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+.mud-messenger-giphy-grid img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 640px) {
+  .mud-messenger-panel.is-fullscreen .mud-messenger-giphy-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.mud-messenger-giphy-search {
+  display: block;
+  margin-bottom: 0;
+}
+
+.mud-messenger-empty {
+  text-align: center;
+  color: var(--mm-muted);
+  font-size: 0.82rem;
+  margin: auto;
+  padding: 1rem;
+}
+
+.mud-messenger-wrap {
+  margin: 1.5rem 0;
+}
+
+@media (max-width: 480px) {
+  .mud-messenger-panel {
+    right: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    bottom: 4.75rem;
+  }
+}

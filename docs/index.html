@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GravFans Messenger — village chat on Grav</title>
+  <meta name="description" content="FREE MIT community chat for Grav 2.0. Float bubble, groups, Giphy, swag tags, Paint Shop. Pro adds mods + forms. Discord who?">
+  <meta property="og:title" content="GravFans Messenger for Grav">
+  <meta property="og:description" content="Flat-file village chat. Text in the lobby. Voice in the war room. 💬">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090f;
+      --fg: #eef4ff;
+      --muted: #94a3b8;
+      --cyan: #22d3ee;
+      --violet: #8b5cf6;
+      --indigo: #4f46e5;
+      --gold: #fbbf24;
+      --mint: #34d399;
+      --card: rgba(238, 244, 255, 0.04);
+      --border: rgba(139, 92, 246, 0.18);
+      --glow: rgba(34, 211, 238, 0.35);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Jost', ui-sans-serif, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 55% at 15% -8%, rgba(34, 211, 238, 0.32), transparent 55%),
+        radial-gradient(ellipse 70% 50% at 88% 5%, rgba(139, 92, 246, 0.38), transparent 50%),
+        radial-gradient(ellipse 75% 55% at 50% 110%, rgba(79, 70, 229, 0.35), transparent 55%),
+        linear-gradient(180deg, #0c1220 0%, var(--bg) 45%, #050608 100%);
+      z-index: -2;
+      animation: skyShift 18s ease-in-out infinite alternate;
+    }
+    @keyframes skyShift {
+      0% { filter: hue-rotate(0deg) brightness(1); }
+      100% { filter: hue-rotate(8deg) brightness(1.05); }
+    }
+    .grain {
+      position: fixed; inset: 0; opacity: 0.04; pointer-events: none; z-index: -1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 0.85rem 1.5rem;
+      backdrop-filter: blur(14px);
+      background: rgba(7, 9, 15, 0.78);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 1.05rem;
+      text-decoration: none; color: var(--fg);
+    }
+    .logo span { color: var(--cyan); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.55rem 1.1rem; border-radius: 999px;
+      font-weight: 600; font-size: 0.88rem; text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border: none; cursor: pointer; font-family: inherit;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-fire {
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      color: #fff; box-shadow: 0 0 28px var(--glow);
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px var(--glow); }
+      50% { box-shadow: 0 0 36px rgba(139, 92, 246, 0.45); }
+    }
+    .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .btn-gold { background: linear-gradient(135deg, #d97706, var(--gold)); color: #1a1200; }
+    .hero { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem 3rem; text-align: center; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+    .pill {
+      font-size: 0.75rem; font-weight: 600; padding: 0.35rem 0.85rem;
+      border-radius: 999px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted);
+    }
+    .pill.hot { border-color: rgba(34, 211, 238, 0.4); color: var(--cyan); }
+    .pill.pro { border-color: rgba(251, 191, 36, 0.4); color: var(--gold); }
+    .bubble { font-size: 3.5rem; display: block; margin-bottom: 0.5rem; filter: drop-shadow(0 0 24px rgba(34, 211, 238, 0.4)); }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.2rem, 6vw, 3.6rem);
+      line-height: 1.08; margin: 0 0 1rem; letter-spacing: -0.02em;
+    }
+    .gradient {
+      background: linear-gradient(135deg, var(--cyan), var(--violet), var(--gold));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero-sub { max-width: 42rem; margin: 0 auto 1rem; color: var(--muted); font-size: 1.05rem; }
+    .hero-quote { font-style: italic; color: var(--violet); opacity: 0.95; margin-bottom: 1.75rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+    section { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem; }
+    .section-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--cyan); margin: 0 0 0.5rem;
+    }
+    h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 1.5rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .stat { padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--border); background: var(--card); text-align: center; }
+    .stat b { display: block; font-size: 1.75rem; color: var(--cyan); font-family: 'Space Grotesk', sans-serif; }
+    .stat span { font-size: 0.82rem; color: var(--muted); }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .feature { padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); background: var(--card); }
+    .feature-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+    .feature h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+    .feature p { margin: 0; font-size: 0.92rem; color: var(--muted); }
+    .feature code { font-size: 0.82rem; color: var(--gold); }
+    .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+    .tier {
+      padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); background: var(--card);
+    }
+    .tier.pro-tier { border-color: rgba(251, 191, 36, 0.35); }
+    .tier h3 { margin: 0 0 0.75rem; font-family: 'Space Grotesk', sans-serif; }
+    .tier ul { margin: 0; padding-left: 1.2rem; color: var(--muted); font-size: 0.92rem; }
+    .tier li { margin-bottom: 0.35rem; }
+    .terminal {
+      background: rgba(0, 0, 0, 0.45); border: 1px solid var(--border);
+      border-radius: 1rem; padding: 1.25rem 1.5rem;
+      font-family: ui-monospace, 'Cascadia Code', monospace;
+      font-size: 0.82rem; line-height: 1.7; overflow-x: auto;
+    }
+    .prompt { color: var(--cyan); }
+    .comment { color: var(--muted); }
+    footer {
+      max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem;
+      text-align: center; border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 0.88rem;
+    }
+    footer a { color: var(--violet); }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <nav class="nav">
+    <a class="logo" href="#">💬 GravFans <span>Messenger</span></a>
+    <div class="nav-links">
+      <a class="btn btn-ghost" href="#features">Features</a>
+      <a class="btn btn-ghost" href="#tiers">Lite / Pro</a>
+      <a class="btn btn-fire" href="https://github.com/GravMUD/grav-plugin-messenger/releases">Get it FREE</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="pill-row">
+      <span class="pill hot">MIT · Lite free forever</span>
+      <span class="pill">Flat-file JSON</span>
+      <span class="pill">Grav 2.0</span>
+      <span class="pill pro">Pro: mods + forms</span>
+    </div>
+    <span class="bubble" aria-hidden="true">💬</span>
+    <h1>Village chat<br><span class="gradient">without Discord</span></h1>
+    <p class="hero-sub"><strong>GravFans Messenger</strong> — float bubble, groups, Giphy, swag tags, JavaBean Paint Shop. Flat-file on cPanel. Admin2 cockpit. Optional Eventz + Swag Store wire-ins.</p>
+    <p class="hero-quote">"Text in the village. Voice in the war room. Discord who?"</p>
+    <div class="hero-actions">
+      <a class="btn btn-fire" href="https://github.com/GravMUD/grav-plugin-messenger">⭐ Star on GitHub</a>
+      <a class="btn btn-gold" href="https://github.com/GravMUD/grav-plugin-messenger/releases">Download 0.3.0</a>
+      <a class="btn btn-ghost" href="https://gravfans.live">GravFans.Live</a>
+    </div>
+  </header>
+
+  <section>
+    <p class="section-label">Social stack chat lane</p>
+    <h2>One plugin. One receipt.</h2>
+    <div class="stats">
+      <div class="stat"><b>$0</b><span>Lite license</span></div>
+      <div class="stat"><b>SSE</b><span>realtime option</span></div>
+      <div class="stat"><b>JSON</b><span>flat-file msgs</span></div>
+      <div class="stat"><b>∞</b><span>village energy</span></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <p class="section-label">Why it hits different</p>
+    <h2>Not another SaaS chat widget.</h2>
+    <div class="grid-3">
+      <div class="feature">
+        <div class="feature-icon">💬</div>
+        <h3>Float + groups</h3>
+        <p>Bottom-right launcher, configurable rooms — <code>general</code>, rally tabs, meetup chats. Poll or SSE stream.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <h3>Paint Shop</h3>
+        <p>JavaBean presets — GetGRAV!, Kersey Goth, Synthwave. Accent hue, density, custom CSS. No theme fork.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎬</div>
+        <h3>Giphy</h3>
+        <p>Server-side API proxy. Key in Admin2 — never shipped to browsers. GIF picker in compose toolbar.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛍️</div>
+        <h3>Swag tags (Lite)</h3>
+        <p><code>:getgrav-tee:</code> shortcodes → Printify thumbs via swag-store catalog. GetGRAV merch in chat.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🧪</div>
+        <h3>Admin2 native</h3>
+        <p>Messenger cockpit + operator bubble on every Admin2 page. Runtime API hooks — no admin-next.yaml writes.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📅</div>
+        <h3>Eventz wire-in</h3>
+        <p>Save an event → optional auto chat group. Meetup RSVP on /eventz, rally energy in Messenger.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tiers">
+    <p class="section-label">Honest tiers</p>
+    <h2>Generous Lite. Pro when you need a war room.</h2>
+    <div class="tier-grid">
+      <div class="tier">
+        <h3>Messenger Lite · MIT</h3>
+        <ul>
+          <li>Unlimited groups (admin-configured)</li>
+          <li>Giphy + swag tags + Paint Shop</li>
+          <li>Float bubble + admin cockpit</li>
+          <li>MCP read/post</li>
+        </ul>
+      </div>
+      <div class="tier pro-tier">
+        <h3>Messenger Pro · commercial</h3>
+        <ul>
+          <li>Everything in Lite</li>
+          <li>Mod tools — edit, delete, warn, boot, ban</li>
+          <li>Form builder — survey, lead, booking in chat</li>
+          <li>PM / voice / AV — roadmap</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <p class="section-label">Sixty seconds</p>
+    <h2>Install</h2>
+    <div class="terminal">
+      <span class="prompt">grav $</span> bin/gpm direct-install https://github.com/GravMUD/grav-plugin-messenger/releases/download/0.3.0/grav-plugin-messenger.zip<br>
+      <span class="prompt">grav $</span> bin/grav cache<br>
+      <span class="comment"># Enable in Admin2 → Plugins → Messenger → paste Giphy key → float bubble ON</span>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>FutureVision Labs · Team DC · Grav Social Stack</strong></p>
+    <p>
+      <a href="https://github.com/GravMUD/grav-plugin-messenger">GitHub</a> ·
+      <a href="https://github.com/GravMUD/grav-plugin-messenger/discussions">Discussions</a> ·
+      <a href="https://eventz.gravmud.site">Eventz</a> ·
+      <a href="https://swag.gravmud.site">Swag Store</a> ·
+      <a href="https://javabean.gravmud.site">JavaBean</a>
+    </p>
+    <p>MIT licensed · groundswell not fork</p>
+  </footer>
+</body>
+</html>

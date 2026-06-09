@@ -1,0 +1,19 @@
+# v0.3.0
+## 06/09/2026
+
+1. [](#improved)
+    * **Single plugin** — merged `grav-mud-messenger` engine + `messenger` Admin2 shell into one `messenger` package
+    * Config key `plugins.messenger` (reads legacy `plugins.grav-mud-messenger` if present)
+    * GPM repo target `grav-plugin-messenger` (one zip, one slug)
+    * **Honest tiers:** Lite = chat, Giphy, swag tags, Paint Shop · Pro = moderation + form builder (gated in code)
+    * Shipped defaults: `edition: lite`, swag tags on (Lite feature per tier canon)
+2. [](#bugfix)
+    * Blueprint labels aligned — swag tags marked Lite, not Pro
+    * Admin settings + config file use `messenger` slug consistently
+
+# v0.2.0
+## 05/2026
+
+1. [](#new)
+    * Float bubble, groups, Giphy, swag tags, Paint Shop, moderation, forms
+    * Admin2 cockpit + MCP wire-ins
