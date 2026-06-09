@@ -1,3 +1,9 @@
+# v0.3.2
+## 06/09/2026
+
+1. [](#bugfix)
+    * **Production boot fix:** register PSR-4 autoload for `Grav\Plugin\Messenger\` — fixes `MudMessengerConfig` not found on Linux/cPanel when plugin classes were never required before use
+
 # v0.3.1
 ## 06/05/2026
 

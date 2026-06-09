@@ -2,6 +2,9 @@
 
 namespace Grav\Plugin;
 
+require_once __DIR__ . '/classes/MudMessengerConfig.php';
+
+use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
 use Grav\Plugin\Messenger\MudMessengerAdminBridgeController;
 use Grav\Plugin\Messenger\MudMessengerApiBridgeController;
@@ -37,6 +40,15 @@ class MessengerPlugin extends Plugin
         return $events;
     }
 
+    public function autoload(): ClassLoader
+    {
+        $loader = new ClassLoader();
+        $loader->addPsr4('Grav\\Plugin\\Messenger\\', __DIR__ . '/classes');
+        $loader->register(true);
+
+        return $loader;
+    }
+
     /** @return array<string, mixed> */
     public static function pluginConfig($grav): array
     {
@@ -49,8 +61,6 @@ class MessengerPlugin extends Plugin
             return;
         }
 
-        require_once __DIR__ . '/classes/MudMessengerConfig.php';
-        require_once __DIR__ . '/classes/MudMessengerConfig.php';
         require_once __DIR__ . '/classes/MudMessengerApiBridgeController.php';
         require_once __DIR__ . '/classes/MudMessengerAdminBridgeController.php';
         require_once __DIR__ . '/classes/MudMessenger.php';
@@ -90,7 +100,6 @@ class MessengerPlugin extends Plugin
             return;
         }
 
-        require_once __DIR__ . '/classes/MudMessengerConfig.php';
         require_once __DIR__ . '/classes/MudMessengerApiBridgeController.php';
         require_once __DIR__ . '/classes/MudMessengerAdminBridgeController.php';
 
@@ -185,7 +194,7 @@ class MessengerPlugin extends Plugin
             'is_pro' => $isPro,
             'name' => $brandTitle,
             'product' => $isPro ? 'GravFans Messenger Pro' : 'GravFans Messenger',
-            'version' => '0.3.1',
+            'version' => '0.3.2',
             'api_route' => $route,
             'api' => $base . '/' . $route,
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),
