@@ -17,7 +17,8 @@ class MudMessengerModeration
     public function __construct(Grav $grav)
     {
         $this->grav = $grav;
-        $this->dir = GRAV_ROOT . '/user/data/mud-messenger/moderation';
+        require_once __DIR__ . '/MudMessengerData.php';
+        $this->dir = MudMessengerData::dir($grav, 'moderation');
     }
 
     public function isEnabled(): bool

@@ -182,7 +182,7 @@
     root.setAttribute('data-default-group', payload.default_group || 'general');
     root.setAttribute('data-giphy', payload.giphy || '1');
     root.setAttribute('data-poll', String(payload.poll || 2500));
-    root.setAttribute('data-realtime', payload.realtime || 'poll');
+    root.setAttribute('data-poll-only', '1');
     root.setAttribute('data-edition', payload.edition || 'lite');
     root.setAttribute('data-brand-title', payload.brand_title || 'GravFans Messenger');
     root.setAttribute('data-footer', payload.footer || '1');

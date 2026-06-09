@@ -15,7 +15,8 @@ class MudMessengerStorage
     public function __construct(Grav $grav)
     {
         $this->grav = $grav;
-        $this->dir = GRAV_ROOT . '/user/data/mud-messenger';
+        require_once __DIR__ . '/MudMessengerData.php';
+        $this->dir = MudMessengerData::dir($grav);
     }
 
     /** @return array<string, array<string, mixed>> */
@@ -98,7 +99,7 @@ class MudMessengerStorage
     /** @param array<string, mixed> $payload
      *  @return array<string, mixed>
      */
-    public function postMessage(array $payload, ?MudMessengerModeration $moderation = null): array
+    public function postMessage(array $payload, ?MudMessengerModeration $moderation = null, bool $allowPrivilegedTypes = false): array
     {
         $groupId = $this->sanitizeGroupId((string) ($payload['group'] ?? $payload['groupId'] ?? 'general'));
         $this->assertGroupExists($groupId);
@@ -125,6 +126,10 @@ class MudMessengerStorage
         }
 
         $type = strtolower((string) ($payload['type'] ?? 'text'));
+        if (!$allowPrivilegedTypes && in_array($type, ['system', 'form'], true)) {
+            throw new \InvalidArgumentException('Message type not allowed.');
+        }
+
         $body = trim((string) ($payload['body'] ?? ''));
         $giphyUrl = trim((string) ($payload['giphyUrl'] ?? ''));
         $giphyId = trim((string) ($payload['giphyId'] ?? ''));
@@ -135,6 +140,8 @@ class MudMessengerStorage
             if ($giphyUrl === '') {
                 throw new \InvalidArgumentException('Giphy URL required.');
             }
+            require_once __DIR__ . '/MudMessengerGiphy.php';
+            $giphyUrl = MudMessengerGiphy::assertAllowedUrl($giphyUrl);
             $body = '';
         } elseif ($type === 'form') {
             if ($formId === '' || !is_array($formSnapshot)) {

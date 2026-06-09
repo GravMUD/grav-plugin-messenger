@@ -7,7 +7,7 @@ namespace Grav\Plugin\Messenger;
 use Grav\Common\Config\Config;
 
 /**
- * Config accessor — plugins.messenger with legacy grav-mud-messenger fallback.
+ * Config accessor — plugins.messenger.
  */
 class MudMessengerConfig
 {
@@ -19,24 +19,14 @@ class MudMessengerConfig
         }
 
         if ($source instanceof Config) {
-            $cfg = (array) $source->get('plugins.messenger', []);
-            if ($cfg !== []) {
-                return $cfg;
-            }
-
-            return (array) $source->get('plugins.grav-mud-messenger', []);
+            return (array) $source->get('plugins.messenger', []);
         }
 
         if (!isset($source['config'])) {
             return [];
         }
 
-        $cfg = (array) $source['config']->get('plugins.messenger', []);
-        if ($cfg !== []) {
-            return $cfg;
-        }
-
-        return (array) $source['config']->get('plugins.grav-mud-messenger', []);
+        return (array) $source['config']->get('plugins.messenger', []);
     }
 
     /** @param \Grav\Common\Grav|Config $source */

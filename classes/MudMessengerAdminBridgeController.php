@@ -23,7 +23,7 @@ class MudMessengerAdminBridgeController extends AbstractApiController
 
     private const ALLOWED_TOP = [
         'enabled', 'edition', 'api_route', 'float_bubble', 'default_group',
-        'poll_interval_ms', 'realtime', 'message_limit', 'groups',
+        'poll_interval_ms', 'message_limit', 'groups',
         'brand_title', 'show_footer_branding', 'footer_text', 'footer_url',
         'launcher_position', 'launcher_icon',
         'giphy_enabled', 'giphy_api_key', 'swag_tags_enabled', 'swag_tags_mod_only', 'swag_tags',
@@ -92,7 +92,7 @@ class MudMessengerAdminBridgeController extends AbstractApiController
         $safe = preg_replace('/[^a-zA-Z0-9._-]+/', '-', $clientName) ?: 'upload.bin';
         $safe = strtolower($safe);
         $ext = strtolower(pathinfo($safe, PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif'];
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
         if (!in_array($ext, $allowed, true)) {
             if ($tmpPath !== '' && str_starts_with($tmpPath, sys_get_temp_dir())) {
                 @unlink($tmpPath);
@@ -326,7 +326,7 @@ HTML;
                 . '}</style>';
         }
 
-        $custom = (string) ($payload['custom_css'] ?? '');
+        $custom = str_replace('</', '<\/', (string) ($payload['custom_css'] ?? ''));
         if ($custom !== '') {
             $html .= '<style data-mm-admin-cockpit-custom>' . $custom . '</style>';
         }
@@ -358,11 +358,10 @@ HTML;
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),
             'giphy' => ($cfg['giphy_enabled'] ?? true) !== false ? '1' : '0',
             'poll' => (int) ($cfg['poll_interval_ms'] ?? 2500),
-            'realtime' => (string) ($cfg['realtime'] ?? 'poll'),
-            'brand_title' => (string) ($cfg['brand_title'] ?? ($edition === 'pro' ? 'GravFans Messenger Pro' : 'GravFans Messenger')),
-            'footer' => ($cfg['show_footer_branding'] ?? true) !== false ? '1' : '0',
-            'footer_text' => (string) ($cfg['footer_text'] ?? 'Powered by GravFans.Live'),
-            'footer_url' => (string) ($cfg['footer_url'] ?? 'https://gravfans.live'),
+            'brand_title' => (string) ($cfg['brand_title'] ?? ($edition === 'pro' ? 'Messenger Pro' : 'Messenger')),
+            'footer' => ($cfg['show_footer_branding'] ?? false) !== false ? '1' : '0',
+            'footer_text' => (string) ($cfg['footer_text'] ?? ''),
+            'footer_url' => (string) ($cfg['footer_url'] ?? ''),
             'launcher_icon' => (string) ($cfg['launcher_icon'] ?? '💬'),
             'launcher_position' => (string) ($cfg['launcher_position'] ?? 'bottom-right'),
             'theme_preset' => (string) ($cfg['theme_preset'] ?? 'default'),
@@ -380,6 +379,32 @@ HTML;
     }
 
     /** @return array<string, mixed> */
+    public static function redactConfigForRead(array $cfg): array
+    {
+        $public = $cfg;
+        unset($public['giphy_api_key']);
+
+        if (isset($public['moderators']) && is_array($public['moderators'])) {
+            $mods = [];
+            foreach ($public['moderators'] as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                $key = trim((string) ($row['mod_key'] ?? ''));
+                unset($row['mod_key']);
+                $row['mod_key_set'] = $key !== '';
+                if ($key !== '') {
+                    $row['mod_key_masked'] = str_repeat('•', max(8, strlen($key) - 4)) . substr($key, -4);
+                }
+                $mods[] = $row;
+            }
+            $public['moderators'] = $mods;
+        }
+
+        return $public;
+    }
+
+    /** @return array<string, mixed> */
     private function readPayload(): array
     {
         $cfg = MudMessengerConfig::all($this->grav);
@@ -388,11 +413,8 @@ HTML;
 
         require_once __DIR__ . '/MudMessengerTheme.php';
 
-        $public = $cfg;
-        unset($public['giphy_api_key']);
-
         return [
-            'config' => $public,
+            'config' => self::redactConfigForRead($cfg),
             'giphy_key_set' => $key !== '',
             'giphy_key_masked' => $masked,
             'theme_presets' => MudMessengerTheme::presets(),
@@ -419,6 +441,24 @@ HTML;
                     continue;
                 }
                 $current[$key] = $val;
+                continue;
+            }
+            if ($key === 'moderators' && is_array($patch[$key])) {
+                $existing = is_array($current['moderators'] ?? null) ? $current['moderators'] : [];
+                $merged = [];
+                foreach ($patch[$key] as $i => $row) {
+                    if (!is_array($row)) {
+                        continue;
+                    }
+                    $incomingKey = trim((string) ($row['mod_key'] ?? ''));
+                    $priorKey = trim((string) ($existing[$i]['mod_key'] ?? ''));
+                    if ($incomingKey === '' || str_contains($incomingKey, '•')) {
+                        $row['mod_key'] = $priorKey;
+                    }
+                    unset($row['mod_key_set'], $row['mod_key_masked']);
+                    $merged[] = $row;
+                }
+                $current['moderators'] = $merged;
                 continue;
             }
             $current[$key] = $patch[$key];

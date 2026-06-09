@@ -693,12 +693,15 @@
       this.loadSwagTags();
       return;
     }
-    var author = encodeURIComponent(String(this.nickEl && this.nickEl.value ? this.nickEl.value : getNick() || ""));
-    var modKey = encodeURIComponent(String(this.modKeyEl && this.modKeyEl.value ? this.modKeyEl.value : getModKey() || ""));
+    var author = String(this.nickEl && this.nickEl.value ? this.nickEl.value : getNick() || "");
+    var modKey = String(this.modKeyEl && this.modKeyEl.value ? this.modKeyEl.value : getModKey() || "");
     var headers = apiAuthHeaders();
-    fetch(this.api + "/mod/session?author=" + author + "&modKey=" + modKey, {
+    headers["Content-Type"] = "application/json";
+    fetch(this.api + "/mod/session", {
+      method: "POST",
       headers: headers,
       credentials: "include",
+      body: JSON.stringify({ author: author, modKey: modKey }),
     })
       .then(function (r) {
         return r.json();
@@ -1280,49 +1283,9 @@
   MessengerApp.prototype.connectStream = function () {
     var self = this;
     this.stopStream();
-
-    var pollOnly =
-      this.pollOnly ||
-      this.root.getAttribute("data-realtime") === "poll" ||
-      this.root.getAttribute("data-poll-only") === "1";
-
-    if (pollOnly || typeof EventSource === "undefined") {
-      this.pollTimer = setInterval(function () {
-        self.pollNew();
-      }, this.pollMs);
-      return;
-    }
-
-    var url =
-      this.api +
-      "/stream/" +
-      encodeURIComponent(this.group) +
-      "?since=" +
-      encodeURIComponent(this.lastId || "");
-    try {
-      this.eventSource = new EventSource(url);
-      this.eventSource.addEventListener("message", function (ev) {
-        try {
-          var data = JSON.parse(ev.data);
-          if (data.ok && data.message) {
-            var exists = self.messages.some(function (m) {
-              return m.id === data.message.id;
-            });
-            if (!exists) self.appendMessage(data.message);
-          }
-        } catch (_e) {}
-      });
-      this.eventSource.onerror = function () {
-        self.stopStream();
-        self.pollTimer = setInterval(function () {
-          self.pollNew();
-        }, self.pollMs);
-      };
-    } catch (_e) {
-      this.pollTimer = setInterval(function () {
-        self.pollNew();
-      }, this.pollMs);
-    }
+    this.pollTimer = setInterval(function () {
+      self.pollNew();
+    }, this.pollMs);
   };
 
   MessengerApp.prototype.reconnectStream = function () {
@@ -1330,10 +1293,6 @@
   };
 
   MessengerApp.prototype.stopStream = function () {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
-    }
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
@@ -1393,15 +1352,13 @@
       embed: root.hasAttribute("data-mud-messenger-embed"),
       edition: root.getAttribute("data-edition") || "lite",
       moderationEnabled: root.getAttribute("data-moderation") !== "0",
-      brandTitle: root.getAttribute("data-brand-title") || "GravFans Messenger",
+      brandTitle: root.getAttribute("data-brand-title") || "Messenger",
       showFooter: root.getAttribute("data-footer") === "1",
-      footerText: root.getAttribute("data-footer-text") || "Powered by GravFans.Live",
-      footerUrl: root.getAttribute("data-footer-url") || "https://gravfans.live",
+      footerText: root.getAttribute("data-footer-text") || "",
+      footerUrl: root.getAttribute("data-footer-url") || "",
       launcherIcon: root.getAttribute("data-launcher-icon") || "💬",
       launcherPosition: root.getAttribute("data-launcher-position") || "bottom-right",
-      pollOnly:
-        root.getAttribute("data-realtime") === "poll" ||
-        root.getAttribute("data-poll-only") === "1",
+      pollOnly: true,
       session: session,
       nickLocked: !!(session && session.nick_locked),
       adminCockpit: root.getAttribute("data-admin-cockpit") === "1",
@@ -1441,9 +1398,7 @@
     if (el.getAttribute("data-launcher-position")) {
       inner.setAttribute("data-launcher-position", el.getAttribute("data-launcher-position"));
     }
-    if (el.getAttribute("data-realtime")) {
-      inner.setAttribute("data-realtime", el.getAttribute("data-realtime"));
-    }
+    inner.setAttribute("data-poll-only", "1");
     if (el.getAttribute("data-theme-style")) {
       inner.setAttribute("data-theme-style", el.getAttribute("data-theme-style"));
     }

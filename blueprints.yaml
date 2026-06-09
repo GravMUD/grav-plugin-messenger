@@ -1,8 +1,8 @@
 name: GravFans Messenger
 slug: messenger
 type: plugin
-version: 0.3.2
-description: GravFans Messenger (Lite) — flat-file community chat. Pro unlocks moderation, form builder, PM & AV (roadmap).
+version: 0.3.3
+description: Flat-file community chat for Grav 2.0 — polling transport, Giphy, Paint Shop. Pro unlocks moderation and forms.
 icon: comment-dots
 author:
   name: FutureVision Labs · Team DC
@@ -11,10 +11,10 @@ author:
 homepage: https://messenger.gravmud.site
 bugs: https://github.com/GravMUD/grav-plugin-messenger/discussions
 docs: https://messenger.gravmud.site
-keywords: grav, gravfans, messenger, chat, community, giphy, realtime, pro
+keywords: grav, messenger, chat, community, giphy, polling, pro
 license: MIT
 compatibility:
-  grav: ['1.7', '2.0']
+  grav: ['2.0']
 dependencies:
   - { name: grav, version: '>=2.0.0' }
   - { name: admin2, version: '>=1.0.0' }
@@ -34,7 +34,10 @@ form:
               type: toggle
               label: Plugin Status
               highlight: 1
-              default: 1
+              default: 0
+              options:
+                1: Enabled
+                0: Disabled
               validate:
                 type: bool
             edition:
@@ -43,8 +46,8 @@ form:
               default: lite
               help: Lite = chat, Giphy, swag tags, Paint Shop. Pro unlocks mod tools, form builder, PM & AV (when shipped).
               options:
-                lite: GravFans Messenger (Lite)
-                pro: GravFans Messenger Pro
+                lite: Messenger (Lite)
+                pro: Messenger Pro
             api_route:
               type: text
               label: API route prefix
@@ -73,7 +76,7 @@ form:
               type: number
               label: Poll interval (ms)
               default: 2500
-              help: Fallback when SSE is unavailable.
+              help: How often the client polls for new messages.
             message_limit:
               type: number
               label: Max messages per group
@@ -95,18 +98,18 @@ form:
               type: toggle
               label: Show footer branding
               highlight: 1
-              default: 1
-              help: e.g. "Powered by GravFans.Live" under the compose box.
+              default: 0
+              help: Optional link under the compose box.
               validate:
                 type: bool
             footer_text:
               type: text
               label: Footer text
-              default: 'Powered by GravFans.Live'
+              default: ''
             footer_url:
               type: text
               label: Footer link URL
-              default: 'https://gravfans.live'
+              default: ''
             launcher_position:
               type: select
               label: Chatbox position
@@ -142,7 +145,7 @@ form:
               validate:
                 type: bool
             giphy_api_key:
-              type: text
+              type: password
               label: Giphy API key
               placeholder: Paste key from developers.giphy.com
               help: Required for GIF search. Set here in Admin — saved in user/config/plugins/messenger.yaml.
@@ -201,7 +204,7 @@ form:
                   label: Chat username / nick
                   placeholder: chief
                 .mod_key:
-                  type: text
+                  type: password
                   label: Mod key
                   placeholder: secret-key-for-this-mod
                   help: Mod enters this in chat UI to unlock mod tools.
@@ -254,7 +257,7 @@ form:
             forms_help:
               type: section
               title: Templates
-              text: 'Survey · Lead capture · Booking — ops launch forms into chat; responses save to user/data/mud-messenger/forms/'
+              text: 'Survey · Lead capture · Booking — ops launch forms into chat; responses save to user/data/messenger/forms/'
             forms_enabled:
               type: toggle
               label: Enable form builder

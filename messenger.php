@@ -28,14 +28,12 @@ class MessengerPlugin extends Plugin
             'onAdmin2SpaShellHead' => ['onAdmin2SpaShellHead', 0],
         ];
 
-        if (self::supportsGravApiBridge()) {
-            $events['onApiRegisterRoutes'] = ['onApiRegisterRoutes', 0];
-            $events['onApiCollectPublicRoutes'] = ['onApiCollectPublicRoutes', 0];
-            $events['onApiSidebarItems'] = ['onApiSidebarItems', 0];
-            $events['onApiPluginPageInfo'] = ['onApiPluginPageInfo', 0];
-            $events['onApiAdminSettingsPanels'] = ['onApiAdminSettingsPanels', 0];
-            $events['onApiFloatingWidgets'] = ['onApiFloatingWidgets', 0];
-        }
+        $events['onApiRegisterRoutes'] = ['onApiRegisterRoutes', 0];
+        $events['onApiCollectPublicRoutes'] = ['onApiCollectPublicRoutes', 0];
+        $events['onApiSidebarItems'] = ['onApiSidebarItems', 0];
+        $events['onApiPluginPageInfo'] = ['onApiPluginPageInfo', 0];
+        $events['onApiAdminSettingsPanels'] = ['onApiAdminSettingsPanels', 0];
+        $events['onApiFloatingWidgets'] = ['onApiFloatingWidgets', 0];
 
         return $events;
     }
@@ -70,23 +68,6 @@ class MessengerPlugin extends Plugin
     {
         if (!$this->isEnabled() || $this->isAdmin()) {
             return;
-        }
-
-        $action = $this->apiAction();
-        if ($action !== null) {
-            if (class_exists(\Grav\Plugin\Api\ApiRouteCollector::class)) {
-                return;
-            }
-
-            require_once __DIR__ . '/classes/MudMessenger.php';
-            require_once __DIR__ . '/classes/MudMessengerMambersBridge.php';
-            $messenger = new \Grav\Plugin\Messenger\MudMessenger($this->grav);
-            $siteUser = \Grav\Plugin\Messenger\MudMessengerMambersBridge::siteUser($this->grav);
-            if ($siteUser !== null) {
-                $messenger->setApiUser($siteUser);
-            }
-            $messenger->handle($action);
-            exit;
         }
 
         if ($this->isEnabled() && !$this->isEmbedRequest()) {
@@ -194,17 +175,16 @@ class MessengerPlugin extends Plugin
             'is_pro' => $isPro,
             'name' => $brandTitle,
             'product' => $isPro ? 'GravFans Messenger Pro' : 'GravFans Messenger',
-            'version' => '0.3.2',
+            'version' => '0.3.3',
             'api_route' => $route,
             'api' => $base . '/' . $route,
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),
             'float_bubble' => !empty($cfg['float_bubble']),
             'giphy_enabled' => !empty($cfg['giphy_enabled']),
             'poll_interval_ms' => (int) ($cfg['poll_interval_ms'] ?? 2500),
-            'realtime' => (string) ($cfg['realtime'] ?? 'poll'),
             'show_footer_branding' => !empty($cfg['show_footer_branding']),
-            'footer_text' => (string) ($cfg['footer_text'] ?? 'Powered by GravFans.Live'),
-            'footer_url' => (string) ($cfg['footer_url'] ?? 'https://gravfans.live'),
+            'footer_text' => (string) ($cfg['footer_text'] ?? ''),
+            'footer_url' => (string) ($cfg['footer_url'] ?? ''),
             'launcher_position' => (string) ($cfg['launcher_position'] ?? 'bottom-right'),
             'launcher_icon' => (string) ($cfg['launcher_icon'] ?? '💬'),
             'theme_preset' => (string) ($cfg['theme_preset'] ?? 'default'),
@@ -321,8 +301,8 @@ class MessengerPlugin extends Plugin
             'description' => 'Giphy, moderation, forms, Paint Shop theming',
             'icon' => 'fa-comment-dots',
             'blueprint' => 'messenger-settings',
-            'data_endpoint' => '/config/plugins/messenger',
-            'save_endpoint' => '/config/plugins/messenger',
+            'data_endpoint' => '/messenger/admin/config',
+            'save_endpoint' => '/messenger/admin/config',
             'priority' => 13,
         ];
         $event['panels'] = $panels;
@@ -405,22 +385,6 @@ class MessengerPlugin extends Plugin
     private function isEnabled(): bool
     {
         return MudMessengerConfig::isEnabled($this->grav);
-    }
-
-    private function apiAction(): ?string
-    {
-        $route = trim((string) MudMessengerConfig::get($this->grav, 'api_route', 'api/mud-messenger'), '/');
-        $path = trim((string) $this->grav['uri']->path(), '/');
-
-        if ($path === $route) {
-            return '';
-        }
-
-        if (!str_starts_with($path, $route . '/')) {
-            return null;
-        }
-
-        return trim(substr($path, strlen($route)), '/');
     }
 
     private static function supportsGravApiBridge(): bool

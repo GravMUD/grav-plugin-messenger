@@ -7,7 +7,7 @@ require_once __DIR__ . '/MudMessengerConfig.php';
 use Grav\Common\Grav;
 
 /**
- * JSON + SSE API for GravMUD Messenger.
+ * JSON API for GravFans Messenger (polling transport).
  */
 class MudMessenger
 {
@@ -99,28 +99,25 @@ class MudMessenger
                     if ($apiUser !== null) {
                         $body['_api_user'] = $apiUser;
                     }
-                    $this->respondJson($this->storage->postMessage($body, new MudMessengerModeration($this->grav)));
+                    $this->respondJson($this->storage->postMessage($body, new MudMessengerModeration($this->grav), false));
                     return;
                 }
                 $this->fail('Method not allowed', 405);
                 return;
             }
 
-            if (str_starts_with($action, 'stream/')) {
-                $this->requireMethod($method, 'GET');
-                $group = substr($action, strlen('stream/'));
-                $this->handleStream($group);
-                return;
-            }
-
             if ($action === 'giphy/search') {
                 $this->requireMethod($method, 'GET');
+                require_once __DIR__ . '/MudMessengerGiphy.php';
+                MudMessengerGiphy::assertRateLimit($this->grav);
                 $this->respondJson($this->searchGiphy((string) ($_GET['q'] ?? '')));
                 return;
             }
 
             if ($action === 'giphy/trending') {
                 $this->requireMethod($method, 'GET');
+                require_once __DIR__ . '/MudMessengerGiphy.php';
+                MudMessengerGiphy::assertRateLimit($this->grav);
                 $this->respondJson($this->trendingGiphy());
                 return;
             }
@@ -170,46 +167,6 @@ class MudMessenger
         }
     }
 
-    private function handleStream(string $groupId): void
-    {
-        if ($this->bridgeMode) {
-            $this->fail('SSE not available via API bridge.', 501);
-            return;
-        }
-
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
-        header('Content-Type: text/event-stream; charset=utf-8');
-        header('Cache-Control: no-cache, no-store, must-revalidate');
-        header('Connection: keep-alive');
-        header('Access-Control-Allow-Origin: *');
-        header('X-Accel-Buffering: no');
-
-        $since = (string) ($_GET['since'] ?? '');
-        $groupId = strtolower(trim(preg_replace('/[^a-z0-9_-]/', '', $groupId) ?? ''));
-
-        @set_time_limit(0);
-
-        for ($i = 0; $i < 8; $i++) {
-            $batch = $this->storage->messagesSince($groupId, $since);
-            foreach ($batch as $msg) {
-                echo 'event: message' . "\n";
-                echo 'data: ' . json_encode(['ok' => true, 'message' => $msg], JSON_UNESCAPED_UNICODE) . "\n\n";
-                $since = (string) ($msg['id'] ?? $since);
-                flush();
-            }
-
-            echo ": keepalive\n\n";
-            flush();
-            if (connection_aborted()) {
-                break;
-            }
-            sleep(2);
-        }
-    }
-
     /** @return array<int, array<string, string>> */
     private function giphyCategories(): array
     {
@@ -221,8 +178,8 @@ class MudMessenger
             ['id' => 'gaming', 'label' => 'Gaming', 'mode' => 'search', 'query' => 'gaming'],
             ['id' => 'anime', 'label' => 'Anime', 'mode' => 'search', 'query' => 'anime'],
             ['id' => 'memes', 'label' => 'Memes', 'mode' => 'search', 'query' => 'meme'],
-            ['id' => 'getgrav', 'label' => 'GetGRAV!', 'mode' => 'search', 'query' => 'rocket space launch'],
-            ['id' => 'lasagna', 'label' => 'Lasagna', 'mode' => 'search', 'query' => 'lasagna food'],
+            ['id' => 'space', 'label' => 'Space', 'mode' => 'search', 'query' => 'rocket space launch'],
+            ['id' => 'food', 'label' => 'Food', 'mode' => 'search', 'query' => 'food celebrate'],
         ];
     }
 
@@ -327,7 +284,15 @@ class MudMessenger
         $moderation = new MudMessengerModeration($this->grav);
 
         if ($action === 'mod/session') {
-            $this->requireMethod($method, 'GET');
+            if ($method === 'POST') {
+                $body = $this->readJsonBody();
+                $author = (string) ($body['author'] ?? '');
+                $modKey = (string) ($body['modKey'] ?? '');
+            } else {
+                $this->requireMethod($method, 'GET');
+                $author = (string) ($_GET['author'] ?? '');
+                $modKey = '';
+            }
             $authedUser = $this->resolveAuthedUser();
             if ($authedUser !== null) {
                 require_once __DIR__ . '/MudMessengerIdentity.php';
@@ -344,8 +309,6 @@ class MudMessenger
                     return;
                 }
             }
-            $author = (string) ($_GET['author'] ?? '');
-            $modKey = (string) ($_GET['modKey'] ?? '');
             $this->respondJson($moderation->session($author, $modKey));
             return;
         }
@@ -386,7 +349,7 @@ class MudMessenger
                 'author' => 'Moderator',
                 'type' => 'system',
                 'body' => '⚠️ Warning for ' . $target . ': ' . $reason,
-            ], $moderation);
+            ], $moderation, true);
             $this->respondJson([
                 'ok' => true,
                 'warning' => $warn['warning'],
@@ -407,7 +370,7 @@ class MudMessenger
                 'author' => 'Moderator',
                 'type' => 'system',
                 'body' => '🥾 ' . $target . ' removed from room for ' . $minutes . ' minutes.',
-            ], $moderation);
+            ], $moderation, true);
             $this->respondJson([
                 'ok' => true,
                 'boot' => $boot['boot'],
@@ -448,7 +411,7 @@ class MudMessenger
                 'type' => 'form',
                 'formId' => $formId,
                 'form' => $snapshot,
-            ], $moderation));
+            ], $moderation, true));
             return;
         }
 
