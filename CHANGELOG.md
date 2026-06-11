@@ -1,3 +1,9 @@
+# v0.3.5
+## 06/11/2026
+
+1. [](#bugfix)
+    * **Grav 2 RC5 Mambers bridge** — `MudMessengerMambersBridge::siteUser()` and `MudMessengerIdentity` read `username` / `fullname` via `get()` (fixes `User::username()` fatals when Mambers identity bridge runs on logged-in page loads)
+
 # v0.3.4
 ## 06/05/2026
 

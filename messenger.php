@@ -177,7 +177,7 @@ class MessengerPlugin extends Plugin
             'is_pro' => $isPro,
             'name' => $brandTitle,
             'product' => $isPro ? 'GravFans Messenger Pro' : 'GravFans Messenger',
-            'version' => '0.3.4',
+            'version' => '0.3.5',
             'api_route' => $route,
             'api' => $base . '/' . $route,
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),

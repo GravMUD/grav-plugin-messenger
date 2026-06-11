@@ -24,7 +24,7 @@ class MudMessengerIdentity
         }
 
         $author = $this->displayNameForUser($user);
-        $username = (string) $user->username();
+        $username = trim((string) ($user->get('username') ?? ''));
         $role = $this->roleForUser($user);
         $mod = $this->moderatorPermissionsForUser($user);
 
@@ -80,7 +80,7 @@ class MudMessengerIdentity
             return $mambersMod;
         }
 
-        $username = strtolower((string) $user->username());
+        $username = strtolower(trim((string) ($user->get('username') ?? '')));
         foreach ($this->moderatorRows() as $row) {
             if (!is_array($row)) {
                 continue;
@@ -141,12 +141,12 @@ class MudMessengerIdentity
 
     public function displayNameForUser(UserInterface $user): string
     {
-        $fullname = trim((string) $user->fullname());
+        $fullname = trim((string) ($user->get('fullname') ?? ''));
         if ($fullname !== '') {
             return $this->sanitizeDisplayName($fullname);
         }
 
-        return $this->sanitizeDisplayName((string) $user->username());
+        return $this->sanitizeDisplayName(trim((string) ($user->get('username') ?? '')));
     }
 
     /** @return list<string> */

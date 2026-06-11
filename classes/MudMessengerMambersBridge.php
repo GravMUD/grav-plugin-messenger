@@ -73,7 +73,7 @@ class MudMessengerMambersBridge
             return null;
         }
 
-        if ((string) $user->username() === '') {
+        if (trim((string) ($user->get('username') ?? '')) === '') {
             return null;
         }
 
