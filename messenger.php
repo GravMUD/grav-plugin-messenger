@@ -21,7 +21,10 @@ class MessengerPlugin extends Plugin
     public static function getSubscribedEvents(): array
     {
         $events = [
-            'onPluginsInitialized' => [['onPluginsInitializedEarly', 100000]],
+            'onPluginsInitializedEarly' => [
+                ['interceptPublicApi', 100001],
+                ['onPluginsInitializedEarly', 100000],
+            ],
             'onPagesInitialized' => ['onPagesInitialized', 0],
             'onPageNotFound' => ['onPagesInitialized', 0],
             'onTwigInitialized' => ['onTwigInitialized', 0],
@@ -57,13 +60,40 @@ class MessengerPlugin extends Plugin
 
     public function onPluginsInitializedEarly(): void
     {
-        if (!$this->isEnabled() || !self::supportsGravApiBridge()) {
+        if (!$this->isEnabled()) {
             return;
         }
 
-        require_once __DIR__ . '/classes/MudMessengerApiBridgeController.php';
-        require_once __DIR__ . '/classes/MudMessengerAdminBridgeController.php';
         require_once __DIR__ . '/classes/MudMessenger.php';
+
+        if (self::supportsGravApiBridge()) {
+            require_once __DIR__ . '/classes/MudMessengerApiBridgeController.php';
+            require_once __DIR__ . '/classes/MudMessengerAdminBridgeController.php';
+        }
+    }
+
+    /** Direct public JSON — bypass Grav API middleware (same pattern as goggrav / mud headless). */
+    public function interceptPublicApi(): void
+    {
+        if (!$this->isEnabled() || $this->isAdmin()) {
+            return;
+        }
+
+        $cfg = self::pluginConfig($this->grav);
+        $legacy = trim((string) ($cfg['api_route'] ?? 'api/mud-messenger'), '/');
+        $prefixes = array_values(array_unique([$legacy, 'api/v1/mud-messenger']));
+        $path = trim((string) $this->grav['uri']->path(), '/');
+
+        foreach ($prefixes as $apiPrefix) {
+            if ($apiPrefix === '' || ($path !== $apiPrefix && !str_starts_with($path, $apiPrefix . '/'))) {
+                continue;
+            }
+
+            require_once __DIR__ . '/classes/MudMessenger.php';
+            $action = $path === $apiPrefix ? '' : trim(substr($path, strlen($apiPrefix)), '/');
+            (new MudMessenger($this->grav))->handle($action);
+            exit;
+        }
     }
 
     public function onPagesInitialized(): void
@@ -146,9 +176,6 @@ class MessengerPlugin extends Plugin
         }
 
         $route = trim((string) ($cfg['api_route'] ?? 'api/mud-messenger'), '/');
-        if (self::supportsGravApiBridge()) {
-            $route = 'api/v1/mud-messenger';
-        }
         $base = rtrim((string) $this->grav['base_url'], '/');
 
         require_once __DIR__ . '/classes/MudMessengerTheme.php';
@@ -177,7 +204,7 @@ class MessengerPlugin extends Plugin
             'is_pro' => $isPro,
             'name' => $brandTitle,
             'product' => $isPro ? 'GravFans Messenger Pro' : 'GravFans Messenger',
-            'version' => '0.3.5',
+            'version' => '0.3.6',
             'api_route' => $route,
             'api' => $base . '/' . $route,
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),

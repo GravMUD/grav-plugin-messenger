@@ -1345,7 +1345,7 @@
     var session = parseSessionAttr(root);
     var app = new MessengerApp({
       root: root,
-      api: root.getAttribute("data-api") || "/api/v1/mud-messenger",
+      api: root.getAttribute("data-api") || "/api/mud-messenger",
       defaultGroup: root.getAttribute("data-default-group") || "general",
       giphyEnabled: root.getAttribute("data-giphy") === "1",
       pollMs: parseInt(root.getAttribute("data-poll") || "2500", 10),
@@ -1373,7 +1373,7 @@
     var inner = document.createElement("div");
     inner.setAttribute("data-mud-messenger", "");
     inner.setAttribute("data-mud-messenger-embed", "");
-    inner.setAttribute("data-api", el.getAttribute("data-api") || "/api/v1/mud-messenger");
+    inner.setAttribute("data-api", el.getAttribute("data-api") || "/api/mud-messenger");
     inner.setAttribute("data-default-group", el.getAttribute("data-group") || "general");
     inner.setAttribute("data-giphy", el.getAttribute("data-giphy") || "1");
     inner.setAttribute("data-poll", el.getAttribute("data-poll") || "2500");

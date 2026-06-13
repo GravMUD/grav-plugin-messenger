@@ -1,3 +1,10 @@
+# v0.3.6
+## 06/12/2026
+
+1. [](#bugfix)
+    * **Grav API `/api/v1/*` 500 on RC5 deploys** — public JSON served at `/api/mud-messenger` via early `interceptPublicApi()` (bypasses broken Grav API router)
+    * **Browser defaults** — `mud-messenger.js` + Twig `api_route` use legacy direct path, not `/api/v1/mud-messenger`
+
 # v0.3.5
 ## 06/11/2026
 
