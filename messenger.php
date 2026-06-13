@@ -6,6 +6,7 @@ require_once __DIR__ . '/classes/MudMessengerConfig.php';
 
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
+use Grav\Plugin\Messenger\MudMessenger;
 use Grav\Plugin\Messenger\MudMessengerAdminBridgeController;
 use Grav\Plugin\Messenger\MudMessengerApiBridgeController;
 use Grav\Plugin\Messenger\MudMessengerConfig;
@@ -24,6 +25,9 @@ class MessengerPlugin extends Plugin
             'onPluginsInitializedEarly' => [
                 ['interceptPublicApi', 100001],
                 ['onPluginsInitializedEarly', 100000],
+            ],
+            'onPluginsInitialized' => [
+                ['interceptPublicApi', 100003],
             ],
             'onPagesInitialized' => ['onPagesInitialized', 0],
             'onPageNotFound' => ['onPagesInitialized', 0],
@@ -204,7 +208,7 @@ class MessengerPlugin extends Plugin
             'is_pro' => $isPro,
             'name' => $brandTitle,
             'product' => $isPro ? 'GravFans Messenger Pro' : 'GravFans Messenger',
-            'version' => '0.3.6',
+            'version' => '0.3.7',
             'api_route' => $route,
             'api' => $base . '/' . $route,
             'default_group' => (string) ($cfg['default_group'] ?? 'general'),

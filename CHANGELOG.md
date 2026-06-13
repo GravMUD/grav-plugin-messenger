@@ -1,3 +1,9 @@
+# v0.3.7
+## 06/13/2026
+
+1. [](#bugfix)
+    * **`Class "Grav\Plugin\MudMessenger" not found`** — import `Grav\Plugin\Messenger\MudMessenger` in `interceptPublicApi()` (fixes chat groups/messages 500 on legacy `/api/mud-messenger` route)
+
 # v0.3.6
 ## 06/12/2026
 
